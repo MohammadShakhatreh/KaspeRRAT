@@ -1,73 +1,48 @@
-package org.kasperrat.server;
+package com.company;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import java.util.Scanner;
 
-public class Server {
+public class Main {
 
-    static String clientname;
 
     public static void main(String[] args) {
-
-
-        try(ServerSocket ss = new ServerSocket(5461)){
-
+        ServerSocket ss=null;
+        try{
+            ss=new ServerSocket(5461);
             System.out.println("listening.. ");
             Socket s = ss.accept();
 
-            PrintWriter pw = new PrintWriter(s.getOutputStream());
+            PrintWriter pw = new PrintWriter(s.getOutputStream(),true);
             BufferedReader bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
             Scanner in = new Scanner(System.in);
 
+            System.out.println("Connected with : " + s.getInetAddress().getHostName());
 
-            clientname = s.getInetAddress().getHostName();
-            //pw.println("Welcome the server");
-            //pw.flush();
 
-            System.out.println("Connected to: " + clientname);
-
-//            while(!(str = bf.readLine()).equals("bye")){
-//
-//                System.out.println(clientname + ": " + str);
-//                String response = in.nextLine();
-//                pw.println(response);
-//            }
-
-            //poc();
-
-            String str;
-            do{
+            String str=null;
+            while(true){
                 str = in.nextLine();
                 pw.println(str);
                 pw.flush();
 
-                if(str.equals("bye")) break;
+                if(str.equals("bye")) {
+                    s.close();
+                    break;
+                }
+                System.out.println("Response : ");
+                //bf.lines().forEach(System.out::println);
+                String ret=".";
+                while(true){
+                    ret=bf.readLine();
 
-                System.out.println("Response: ");
-                bf.lines().forEach(System.out::println);
-                //System.out.println("Response: " + response);
+                    if(ret.equals("`"))break;
 
-            }while(true);
-
-            s.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void poc(String cmd){
-
-        try {
-            Process p = new ProcessBuilder("ls").start();
-            BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            bf.lines().forEach(System.out::println);
+                    System.out.println(ret);
+                }
+                System.out.println("OK!!!!!!!!");
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
